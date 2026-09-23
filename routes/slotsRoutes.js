@@ -1,63 +1,98 @@
 const express = require("express");
-
 const router = express.Router();
+const Slot = require("../models/Slot");
 
-const slots = require("../data/slots");
+router.use(express.json());
 
-router.get("/", (req, res) => {
-    res.json(slots);
-});
-
-router.get("/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const slot = slots.find(slot => slot.id === id);
-
-    if (!slot) {
-        return res.status(404).json({
-            message: "Slot not found"
-        });
+router.get("/", async (req, res) => {
+    try {
+        const slots = await Slot.find();
+        res.json(slots);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching slots" });
     }
-
-    res.json(slot);
 });
 
-router.post("/", (req, res) => {
-    if (!req.body.date || !req.body.time || !req.body.duration) {
-    return res.status(400).json({
-        message: "Date, time and duration are required"
-    });
+router.get("/:id", async (req, res) => {
+    try {
+        const slot = await Slot.findById(req.params.id);
+
+        if (!slot) {
+            return res.status(404).json({ message: "Slot not found" });
+        }
+
+        res.json(slot);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching slot" });
+    }
+});
+
+router.post("/", async (req, res) => {
+    try {
+        const { date, time, duration } = req.body;
+
+        if (!date || !time || !duration) {
+            return res.status(400).json({
+                message: "date, time and duration are required"
+            });
+        }
+
+        const slot = await Slot.create({
+            date,
+            time,
+            duration
+        });
+
+        res.status(201).json(slot);
+    } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error creating slot" });
 }
-    const newSlot = {
-        id: slots.length + 1,
-        date: req.body.date,
-        time: req.body.time,
-        duration: req.body.duration,
-        isBooked: false
-    };
-
-    slots.push(newSlot);
-
-    res.status(201).json(newSlot);
 });
 
-router.delete("/:id", (req, res) => {
-    const id = parseInt(req.params.id);
+router.delete("/:id", async (req, res) => {
+    try {
+        const deletedSlot = await Slot.findByIdAndDelete(req.params.id);
 
-    const index = slots.findIndex(slot => slot.id === id);
+        if (!deletedSlot) {
+            return res.status(404).json({
+                message: "Slot not found"
+            });
+        }
 
-    if (index === -1) {
-        return res.status(404).json({
-            message: "Slot not found"
+        res.json({
+            message: "Slot deleted successfully",
+            slot: deletedSlot
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error deleting slot"
         });
     }
+});
 
-    const deletedSlot = slots.splice(index, 1);
+router.put("/:id", async (req, res) => {
+    try {
+        const updatedSlot = await Slot.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
 
-    res.json({
-        message: "Slot deleted successfully",
-        slot: deletedSlot[0]
-    });
+        if (!updatedSlot) {
+            return res.status(404).json({
+                message: "Slot not found"
+            });
+        }
+
+        res.json(updatedSlot);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error updating slot"
+        });
+    }
 });
 
 module.exports = router;
