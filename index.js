@@ -19,7 +19,9 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
 });
+const authRoutes = require("./routes/authRoutes");
 const slotsRoutes = require("./routes/slotsRoutes");
+app.use("/auth", authRoutes);
 app.use("/slots", slotsRoutes);
 
 app.get("/", (req, res) => {

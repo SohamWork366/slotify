@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Slot = require("../models/Slot");
+const protect = require("../middleware/authMiddleware");
 
 router.use(express.json());
 
@@ -27,7 +28,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", protect, async (req, res) => {
     try {
         const { date, time, duration } = req.body;
 
@@ -50,7 +51,7 @@ router.post("/", async (req, res) => {
 }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
     try {
         const deletedSlot = await Slot.findByIdAndDelete(req.params.id);
 
