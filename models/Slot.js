@@ -17,6 +17,11 @@ const slotSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    bookedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

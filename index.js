@@ -21,8 +21,10 @@ app.use((req, res, next) => {
 });
 const authRoutes = require("./routes/authRoutes");
 const slotsRoutes = require("./routes/slotsRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 app.use("/auth", authRoutes);
 app.use("/slots", slotsRoutes);
+app.use("/bookings", bookingRoutes);
 
 app.get("/", (req, res) => {
     res.json({
